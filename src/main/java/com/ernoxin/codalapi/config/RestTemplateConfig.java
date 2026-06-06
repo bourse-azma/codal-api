@@ -26,6 +26,8 @@ public class RestTemplateConfig {
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE, MediaType.ALL_VALUE)
                 .defaultHeader(HttpHeaders.REFERER, referer)
                 .defaultHeader(HttpHeaders.ORIGIN, origin)
+                .requestFactory(() -> new org.springframework.http.client.BufferingClientHttpRequestFactory(new org.springframework.http.client.SimpleClientHttpRequestFactory()))
+                .interceptors(new LoggingInterceptor())
                 .build();
 
         DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory(baseUrl);

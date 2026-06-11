@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.ernoxin</groupId>
     <artifactId>codal-api</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <name>codal-api</name>
     <description>codal-api</description>
 

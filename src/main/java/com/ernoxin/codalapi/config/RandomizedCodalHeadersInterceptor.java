@@ -34,6 +34,14 @@ public class RandomizedCodalHeadersInterceptor implements ClientHttpRequestInter
             "https://codal.ir/ReportList.aspx?search"
     );
 
+    private static String randomItem(List<String> values) {
+        return values.get(ThreadLocalRandom.current().nextInt(values.size()));
+    }
+
+    private static boolean randomBoolean() {
+        return ThreadLocalRandom.current().nextBoolean();
+    }
+
     @Override
     public ClientHttpResponse intercept(
             org.springframework.http.HttpRequest request,
@@ -58,13 +66,5 @@ public class RandomizedCodalHeadersInterceptor implements ClientHttpRequestInter
         headers.set("Sec-Fetch-Site", "same-site");
 
         return execution.execute(request, body);
-    }
-
-    private static String randomItem(List<String> values) {
-        return values.get(ThreadLocalRandom.current().nextInt(values.size()));
-    }
-
-    private static boolean randomBoolean() {
-        return ThreadLocalRandom.current().nextBoolean();
     }
 }

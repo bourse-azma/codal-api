@@ -47,15 +47,38 @@ public class CodalClient {
     }
 
     private JsonNode getJson(String path) {
+        return getJsonWithRetry(path, 1);
+    }
+
+    private JsonNode getJsonWithRetry(String path, int retriesLeft) {
         try {
             return codalRestTemplate.getForObject(path, JsonNode.class);
         } catch (RestClientResponseException ex) {
-            HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+            int statusCode = ex.getStatusCode().value();
+            if (retriesLeft > 0 && (statusCode == 400 || statusCode == 429 || statusCode >= 500)) {
+                try {
+                    Thread.sleep(750L);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                }
+                return getJsonWithRetry(path, retriesLeft - 1);
+            }
+
+            HttpStatus status = HttpStatus.resolve(statusCode);
             throw new UpstreamApiException(
-                    "Upstream API returned status " + ex.getStatusCode().value() + ": " + ex.getStatusText(),
+                    "Upstream API returned status " + statusCode + ": " + ex.getStatusText(),
                     status != null ? status : HttpStatus.BAD_GATEWAY
             );
         } catch (RestClientException ex) {
+            if (retriesLeft > 0) {
+                try {
+                    Thread.sleep(750L);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                }
+                return getJsonWithRetry(path, retriesLeft - 1);
+            }
+
             throw new UpstreamApiException(
                     "Upstream API request failed: " + ex.getClass().getSimpleName() + " - " + ex.getMessage(),
                     HttpStatus.BAD_GATEWAY

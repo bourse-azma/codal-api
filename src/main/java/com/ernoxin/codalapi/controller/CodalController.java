@@ -43,6 +43,8 @@ public class CodalController {
     ) {
         String normalizedSymbol = RequestParamSupport.firstNonBlank(symbol);
         boolean resolvedSearchMode = searchMode != null ? searchMode : !normalizedSymbol.isEmpty();
+        int safeLength = Math.min(12, Math.max(1, length));
+        int safePage = Math.max(1, page);
 
         CodalModels.NoticeSearchQuery query = new CodalModels.NoticeSearchQuery(
                 includeAudited,
@@ -53,12 +55,12 @@ public class CodalController {
                 companyType,
                 includeConsolidated,
                 isNotAuditedFilter,
-                length,
+                safeLength,
                 letterType,
                 includeMainCategories,
                 includeNotAudited,
                 includeNotConsolidated,
-                page,
+                safePage,
                 publisher,
                 reportingType,
                 normalizedSymbol,

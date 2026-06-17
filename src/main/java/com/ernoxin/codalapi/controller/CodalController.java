@@ -1,10 +1,12 @@
 package com.ernoxin.codalapi.controller;
 
+import com.ernoxin.codalapi.cache.CodalCacheKeyRegistry;
 import com.ernoxin.codalapi.common.api.ApiResponse;
 import com.ernoxin.codalapi.common.util.RequestParamSupport;
 import com.ernoxin.codalapi.domain.CodalModels;
 import com.ernoxin.codalapi.service.CodalService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CodalController {
 
     private final CodalService service;
+    private final ObjectProvider<CodalCacheKeyRegistry> cacheKeyRegistry;
 
     @GetMapping("/notices")
     public ApiResponse<CodalModels.NoticeSearchResult> getNotices(
@@ -68,6 +71,7 @@ public class CodalController {
                 resolvedSearchMode
         );
 
+        cacheKeyRegistry.ifAvailable(registry -> registry.trackNoticeQuery(query));
         return ApiResponse.success(service.getNotices(query));
     }
 
@@ -91,7 +95,9 @@ public class CodalController {
             @RequestParam(name = "symbol", required = false) String symbol,
             @RequestParam(name = "ticker", required = false) String ticker
     ) {
-        return ApiResponse.success(service.getFinancialYears(RequestParamSupport.require("symbol", symbol, ticker)));
+        String resolvedSymbol = RequestParamSupport.require("symbol", symbol, ticker);
+        cacheKeyRegistry.ifAvailable(registry -> registry.trackFinancialYearsSymbol(resolvedSymbol));
+        return ApiResponse.success(service.getFinancialYears(resolvedSymbol));
     }
 
     @GetMapping("/auditors")

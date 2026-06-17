@@ -1,63 +1,88 @@
 package com.ernoxin.codalapi.service;
 
-import com.ernoxin.codalapi.client.CodalClient;
 import com.ernoxin.codalapi.domain.CodalModels;
-import com.ernoxin.codalapi.mapper.CodalMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class CodalService {
 
-    private final CodalClient client;
-    private final CodalMapper mapper;
+    private final CodalFetchService fetchService;
 
+    @Cacheable(
+            cacheResolver = "codalCacheResolver",
+            key = "T(com.ernoxin.codalapi.cache.CodalCacheKeys).notices(#query)",
+            sync = true
+    )
     public CodalModels.NoticeSearchResult getNotices(CodalModels.NoticeSearchQuery query) {
-        return mapper.toNoticeSearchResult(client.get("/search/v2/q", Map.ofEntries(
-                Map.entry("Audited", query.includeAudited()),
-                Map.entry("AuditorRef", query.auditorRef()),
-                Map.entry("Category", query.categoryCode()),
-                Map.entry("Childs", query.includeChildCategories()),
-                Map.entry("CompanyState", query.companyState()),
-                Map.entry("CompanyType", query.companyType()),
-                Map.entry("Consolidatable", query.includeConsolidated()),
-                Map.entry("IsNotAudited", query.isNotAuditedFilter()),
-                Map.entry("Length", query.length()),
-                Map.entry("LetterType", query.letterType()),
-                Map.entry("Mains", query.includeMainCategories()),
-                Map.entry("NotAudited", query.includeNotAudited()),
-                Map.entry("NotConsolidatable", query.includeNotConsolidated()),
-                Map.entry("PageNumber", query.page()),
-                Map.entry("Publisher", query.publisher()),
-                Map.entry("ReportingType", query.reportingType()),
-                Map.entry("Symbol", query.symbol()),
-                Map.entry("TracingNo", query.tracingNumber()),
-                Map.entry("search", query.searchMode())
-        )));
+        return fetchService.getNotices(query);
     }
 
+    @CachePut(
+            cacheResolver = "codalCacheResolver",
+            key = "T(com.ernoxin.codalapi.cache.CodalCacheKeys).notices(#query)"
+    )
+    public CodalModels.NoticeSearchResult refreshNotices(CodalModels.NoticeSearchQuery query) {
+        return fetchService.getNotices(query);
+    }
+
+    @Cacheable(cacheResolver = "codalCacheResolver", key = "'all'", sync = true)
     public CodalModels.CompaniesResult getCompanies() {
-        return mapper.toCompaniesResult(client.get("/search/v1/companies"));
+        return fetchService.getCompanies();
     }
 
+    @CachePut(cacheResolver = "codalCacheResolver", key = "'all'")
+    public CodalModels.CompaniesResult refreshCompanies() {
+        return fetchService.getCompanies();
+    }
+
+    @Cacheable(cacheResolver = "codalCacheResolver", key = "'all'", sync = true)
     public CodalModels.IndustryGroupsResult getIndustryGroups() {
-        return mapper.toIndustryGroupsResult(client.get("/search/v1/IndustryGroup"));
+        return fetchService.getIndustryGroups();
     }
 
+    @CachePut(cacheResolver = "codalCacheResolver", key = "'all'")
+    public CodalModels.IndustryGroupsResult refreshIndustryGroups() {
+        return fetchService.getIndustryGroups();
+    }
+
+    @Cacheable(cacheResolver = "codalCacheResolver", key = "'all'", sync = true)
     public CodalModels.CategoriesResult getCategories() {
-        return mapper.toCategoriesResult(client.get("/search/v1/categories"));
+        return fetchService.getCategories();
     }
 
+    @CachePut(cacheResolver = "codalCacheResolver", key = "'all'")
+    public CodalModels.CategoriesResult refreshCategories() {
+        return fetchService.getCategories();
+    }
+
+    @Cacheable(
+            cacheResolver = "codalCacheResolver",
+            key = "T(com.ernoxin.codalapi.cache.CodalCacheKeys).financialYears(#symbol)",
+            sync = true
+    )
     public CodalModels.FinancialYearsResult getFinancialYears(String symbol) {
-        return mapper.toFinancialYearsResult(symbol,
-                client.get("/search/v1/financialYears", Map.of("Symbol", symbol))
-        );
+        return fetchService.getFinancialYears(symbol);
     }
 
+    @CachePut(
+            cacheResolver = "codalCacheResolver",
+            key = "T(com.ernoxin.codalapi.cache.CodalCacheKeys).financialYears(#symbol)"
+    )
+    public CodalModels.FinancialYearsResult refreshFinancialYears(String symbol) {
+        return fetchService.getFinancialYears(symbol);
+    }
+
+    @Cacheable(cacheResolver = "codalCacheResolver", key = "'all'", sync = true)
     public CodalModels.AuditorsResult getAuditors() {
-        return mapper.toAuditorsResult(client.get("/search/v1/auditors"));
+        return fetchService.getAuditors();
+    }
+
+    @CachePut(cacheResolver = "codalCacheResolver", key = "'all'")
+    public CodalModels.AuditorsResult refreshAuditors() {
+        return fetchService.getAuditors();
     }
 }

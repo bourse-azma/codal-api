@@ -29,12 +29,12 @@ public class CodalCacheResolver implements CacheResolver {
 
     private String resolveCacheName(String methodName) {
         return switch (methodName) {
-            case "getNotices", "refreshNotices" -> cacheProperties.names().notices();
-            case "getCompanies", "refreshCompanies" -> cacheProperties.names().companies();
-            case "getIndustryGroups", "refreshIndustryGroups" -> cacheProperties.names().industryGroups();
-            case "getCategories", "refreshCategories" -> cacheProperties.names().categories();
-            case "getFinancialYears", "refreshFinancialYears" -> cacheProperties.names().financialYears();
-            case "getAuditors", "refreshAuditors" -> cacheProperties.names().auditors();
+            case "getNotices" -> cacheProperties.names().notices();
+            case "getCompanies" -> cacheProperties.names().companies();
+            case "getIndustryGroups" -> cacheProperties.names().industryGroups();
+            case "getCategories" -> cacheProperties.names().categories();
+            case "getFinancialYears" -> cacheProperties.names().financialYears();
+            case "getAuditors" -> cacheProperties.names().auditors();
             default -> throw new IllegalStateException("Unsupported cached method: " + methodName);
         };
     }

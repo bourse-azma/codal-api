@@ -8,41 +8,35 @@ import java.time.Duration;
 @ConfigurationProperties(prefix = "cache")
 public record CacheProperties(
         boolean enabled,
-        Duration refreshInterval,
+        long defaultTtlMs,
         String keyPrefix,
         @NestedConfigurationProperty CacheNames names,
-        @NestedConfigurationProperty CacheRegistry registry
+        @NestedConfigurationProperty CacheTtls ttls
 ) {
-    public String noticesName() {
-        return names().notices();
+    public Duration ttlFor(String cacheName) {
+        return Duration.ofMillis(ttlMsFor(cacheName));
     }
 
-    public String companiesName() {
-        return names().companies();
-    }
-
-    public String industryGroupsName() {
-        return names().industryGroups();
-    }
-
-    public String categoriesName() {
-        return names().categories();
-    }
-
-    public String financialYearsName() {
-        return names().financialYears();
-    }
-
-    public String auditorsName() {
-        return names().auditors();
-    }
-
-    public String noticesRegistryKey() {
-        return registry().notices();
-    }
-
-    public String financialYearsRegistryKey() {
-        return registry().financialYears();
+    public long ttlMsFor(String cacheName) {
+        if (cacheName.equals(names().notices())) {
+            return ttls().noticesMs();
+        }
+        if (cacheName.equals(names().companies())) {
+            return ttls().companiesMs();
+        }
+        if (cacheName.equals(names().industryGroups())) {
+            return ttls().industryGroupsMs();
+        }
+        if (cacheName.equals(names().categories())) {
+            return ttls().categoriesMs();
+        }
+        if (cacheName.equals(names().financialYears())) {
+            return ttls().financialYearsMs();
+        }
+        if (cacheName.equals(names().auditors())) {
+            return ttls().auditorsMs();
+        }
+        return defaultTtlMs();
     }
 
     public record CacheNames(
@@ -55,9 +49,13 @@ public record CacheProperties(
     ) {
     }
 
-    public record CacheRegistry(
-            String notices,
-            String financialYears
+    public record CacheTtls(
+            long noticesMs,
+            long companiesMs,
+            long industryGroupsMs,
+            long categoriesMs,
+            long financialYearsMs,
+            long auditorsMs
     ) {
     }
 }

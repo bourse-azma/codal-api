@@ -19,11 +19,11 @@ import java.util.List;
 import java.util.Map;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class BoorsAzmaUiEnvEnvironmentPostProcessor implements EnvironmentPostProcessor {
+public class BourseAzmaUiEnvEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
-    private static final String ENV_PATH_PROPERTY = "boors-azma.ui.env.path";
-    private static final String DEFAULT_ENV_PATH = "../boors-azma-ui/.env";
-    private static final String PROPERTY_SOURCE_NAME = "boorsAzmaUiDotEnv";
+    private static final String ENV_PATH_PROPERTY = "bourse-azma.ui.env.path";
+    private static final String DEFAULT_ENV_PATH = "../bourse-azma-ui/.env";
+    private static final String PROPERTY_SOURCE_NAME = "bourseAzmaUiDotEnv";
 
     static Map<String, Object> loadDotEnv(Resource resource) {
         Map<String, Object> properties = new LinkedHashMap<>();
@@ -79,7 +79,7 @@ public class BoorsAzmaUiEnvEnvironmentPostProcessor implements EnvironmentPostPr
         String configuredPath = environment.getProperty(ENV_PATH_PROPERTY, DEFAULT_ENV_PATH);
         return List.of(
                 configuredPath,
-                Path.of("boors-azma-ui", ".env").toString()
+                Path.of("bourse-azma-ui", ".env").toString()
         );
     }
 }

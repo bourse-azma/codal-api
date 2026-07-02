@@ -2,6 +2,7 @@ package com.ernoxin.codalapi.controller;
 
 import com.ernoxin.codalapi.common.api.ApiResponse;
 import com.ernoxin.codalapi.common.util.RequestParamSupport;
+import com.ernoxin.codalapi.domain.CodalFinancialModels;
 import com.ernoxin.codalapi.domain.CodalModels;
 import com.ernoxin.codalapi.service.CodalService;
 import lombok.RequiredArgsConstructor;
@@ -101,7 +102,7 @@ public class CodalController {
     }
 
     @GetMapping("/financial-statements")
-    public ApiResponse<CodalModels.FinancialStatementResult> getFinancialStatements(
+    public ApiResponse<CodalFinancialModels.FinancialStatementResult> getFinancialStatements(
             @RequestParam(name = "letterSerial", required = false) String letterSerial,
             @RequestParam(name = "LetterSerial", required = false) String letterSerialAlt,
             @RequestParam(name = "sheetId", required = false) Integer sheetId,
@@ -112,7 +113,7 @@ public class CodalController {
     ) {
         String resolvedLetterSerial = RequestParamSupport.require("letterSerial", letterSerial, letterSerialAlt);
 
-        CodalModels.FinancialStatementQuery query = new CodalModels.FinancialStatementQuery(
+        CodalFinancialModels.FinancialStatementQuery query = new CodalFinancialModels.FinancialStatementQuery(
                 resolvedLetterSerial,
                 sheetId,
                 reportType,
@@ -125,7 +126,7 @@ public class CodalController {
     }
 
     @GetMapping("/financial-statements/by-symbol")
-    public ApiResponse<CodalModels.FinancialStatementBySymbolResult> getFinancialStatementsBySymbol(
+    public ApiResponse<CodalFinancialModels.FinancialStatementBySymbolResult> getFinancialStatementsBySymbol(
             @RequestParam(name = "symbol", required = false) String symbol,
             @RequestParam(name = "ticker", required = false) String ticker,
             @RequestParam(name = "sheetId", required = false) Integer sheetId
@@ -135,7 +136,7 @@ public class CodalController {
     }
 
     @GetMapping("/financial-notices")
-    public ApiResponse<CodalModels.FinancialNoticeListResult> getFinancialNotices(
+    public ApiResponse<CodalFinancialModels.FinancialNoticeListResult> getFinancialNotices(
             @RequestParam(name = "symbol", required = false) String symbol,
             @RequestParam(name = "ticker", required = false) String ticker,
             @RequestParam(defaultValue = "1") int page,
@@ -147,7 +148,7 @@ public class CodalController {
     }
 
     @GetMapping("/financial-notice-statements")
-    public ApiResponse<CodalModels.FinancialStatementResult> getFinancialNoticeStatements(
+    public ApiResponse<CodalFinancialModels.FinancialStatementResult> getFinancialNoticeStatements(
             @RequestParam(name = "letterSerial", required = false) String letterSerial,
             @RequestParam(name = "LetterSerial", required = false) String letterSerialAlt,
             @RequestParam(name = "sheetId", required = false) Integer sheetId

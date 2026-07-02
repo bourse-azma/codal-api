@@ -1,5 +1,6 @@
 package com.ernoxin.codalapi.cache;
 
+import com.ernoxin.codalapi.domain.CodalFinancialModels;
 import com.ernoxin.codalapi.domain.CodalModels;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +31,7 @@ public final class CodalCacheKeys {
         return symbol.trim().toUpperCase();
     }
 
-    public static String financialStatements(CodalModels.FinancialStatementQuery query) {
+    public static String financialStatements(CodalFinancialModels.FinancialStatementQuery query) {
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256")
                     .digest(KEY_MAPPER.writeValueAsString(query).getBytes(StandardCharsets.UTF_8));

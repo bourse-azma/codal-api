@@ -1,5 +1,6 @@
 package com.ernoxin.codalapi.service;
 
+import com.ernoxin.codalapi.domain.CodalFinancialModels;
 import com.ernoxin.codalapi.domain.CodalModels;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -54,19 +55,19 @@ public class CodalService {
             key = "T(com.ernoxin.codalapi.cache.CodalCacheKeys).financialStatements(#query)",
             sync = true
     )
-    public CodalModels.FinancialStatementResult getFinancialStatement(CodalModels.FinancialStatementQuery query) {
+    public CodalFinancialModels.FinancialStatementResult getFinancialStatement(CodalFinancialModels.FinancialStatementQuery query) {
         return fetchService.getFinancialStatement(query);
     }
 
-    public CodalModels.FinancialStatementBySymbolResult getFinancialStatementBySymbol(String symbol, Integer sheetId) {
+    public CodalFinancialModels.FinancialStatementBySymbolResult getFinancialStatementBySymbol(String symbol, Integer sheetId) {
         return fetchService.getFinancialStatementBySymbol(symbol, sheetId);
     }
 
-    public CodalModels.FinancialNoticeListResult getFinancialNoticesBySymbol(String symbol, int page, int size, int length) {
+    public CodalFinancialModels.FinancialNoticeListResult getFinancialNoticesBySymbol(String symbol, int page, int size, int length) {
         return fetchService.getFinancialNoticesBySymbol(symbol, page, size, length);
     }
 
-    public CodalModels.FinancialStatementResult getFinancialStatementByNotice(String letterSerial, Integer sheetId) {
+    public CodalFinancialModels.FinancialStatementResult getFinancialStatementByNotice(String letterSerial, Integer sheetId) {
         return fetchService.getFinancialStatementByNotice(letterSerial, sheetId);
     }
 }

@@ -31,13 +31,12 @@ ENV JAVA_TOOL_OPTIONS="\
 -XX:MaxGCPauseMillis=200 \
 -XX:+UseStringDeduplication \
 -XX:+UseContainerSupport \
--XX:InitialRAMPercentage=50.0 \
--XX:MaxRAMPercentage=75.0 \
--XX:MaxMetaspaceSize=192m \
--XX:+AlwaysPreTouch \
+-XX:InitialRAMPercentage=25.0 \
+-XX:MaxRAMPercentage=65.0 \
+-XX:MaxMetaspaceSize=160m \
+-XX:MaxDirectMemorySize=48m \
 -XX:+DisableExplicitGC \
 -XX:+ExitOnOutOfMemoryError \
--XX:+OptimizeStringConcat \
 -Djava.security.egd=file:/dev/./urandom \
 -Dfile.encoding=UTF-8"
 

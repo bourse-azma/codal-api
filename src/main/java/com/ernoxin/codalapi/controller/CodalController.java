@@ -99,4 +99,60 @@ public class CodalController {
     public ApiResponse<CodalModels.AuditorsResult> getAuditors() {
         return ApiResponse.success(service.getAuditors());
     }
+
+    @GetMapping("/financial-statements")
+    public ApiResponse<CodalModels.FinancialStatementResult> getFinancialStatements(
+            @RequestParam(name = "letterSerial", required = false) String letterSerial,
+            @RequestParam(name = "LetterSerial", required = false) String letterSerialAlt,
+            @RequestParam(name = "sheetId", required = false) Integer sheetId,
+            @RequestParam(name = "rt", defaultValue = "0") int reportType,
+            @RequestParam(name = "let", defaultValue = "6") int letterType,
+            @RequestParam(name = "ct", defaultValue = "0") int companyType,
+            @RequestParam(name = "ft", defaultValue = "-1") int fileType
+    ) {
+        String resolvedLetterSerial = RequestParamSupport.require("letterSerial", letterSerial, letterSerialAlt);
+
+        CodalModels.FinancialStatementQuery query = new CodalModels.FinancialStatementQuery(
+                resolvedLetterSerial,
+                sheetId,
+                reportType,
+                letterType,
+                companyType,
+                fileType
+        );
+
+        return ApiResponse.success(service.getFinancialStatement(query));
+    }
+
+    @GetMapping("/financial-statements/by-symbol")
+    public ApiResponse<CodalModels.FinancialStatementBySymbolResult> getFinancialStatementsBySymbol(
+            @RequestParam(name = "symbol", required = false) String symbol,
+            @RequestParam(name = "ticker", required = false) String ticker,
+            @RequestParam(name = "sheetId", required = false) Integer sheetId
+    ) {
+        String resolvedSymbol = RequestParamSupport.require("symbol", symbol, ticker);
+        return ApiResponse.success(service.getFinancialStatementBySymbol(resolvedSymbol, sheetId));
+    }
+
+    @GetMapping("/financial-notices")
+    public ApiResponse<CodalModels.FinancialNoticeListResult> getFinancialNotices(
+            @RequestParam(name = "symbol", required = false) String symbol,
+            @RequestParam(name = "ticker", required = false) String ticker,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "-1") int length
+    ) {
+        String resolvedSymbol = RequestParamSupport.require("symbol", symbol, ticker);
+        return ApiResponse.success(service.getFinancialNoticesBySymbol(resolvedSymbol, page, size, length));
+    }
+
+    @GetMapping("/financial-notice-statements")
+    public ApiResponse<CodalModels.FinancialStatementResult> getFinancialNoticeStatements(
+            @RequestParam(name = "letterSerial", required = false) String letterSerial,
+            @RequestParam(name = "LetterSerial", required = false) String letterSerialAlt,
+            @RequestParam(name = "sheetId", required = false) Integer sheetId
+    ) {
+        String resolvedLetterSerial = RequestParamSupport.require("letterSerial", letterSerial, letterSerialAlt);
+        return ApiResponse.success(service.getFinancialStatementByNotice(resolvedLetterSerial, sheetId));
+    }
 }

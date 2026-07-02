@@ -48,4 +48,25 @@ public class CodalService {
     public CodalModels.AuditorsResult getAuditors() {
         return fetchService.getAuditors();
     }
+
+    @Cacheable(
+            cacheResolver = "codalCacheResolver",
+            key = "T(com.ernoxin.codalapi.cache.CodalCacheKeys).financialStatements(#query)",
+            sync = true
+    )
+    public CodalModels.FinancialStatementResult getFinancialStatement(CodalModels.FinancialStatementQuery query) {
+        return fetchService.getFinancialStatement(query);
+    }
+
+    public CodalModels.FinancialStatementBySymbolResult getFinancialStatementBySymbol(String symbol, Integer sheetId) {
+        return fetchService.getFinancialStatementBySymbol(symbol, sheetId);
+    }
+
+    public CodalModels.FinancialNoticeListResult getFinancialNoticesBySymbol(String symbol, int page, int size, int length) {
+        return fetchService.getFinancialNoticesBySymbol(symbol, page, size, length);
+    }
+
+    public CodalModels.FinancialStatementResult getFinancialStatementByNotice(String letterSerial, Integer sheetId) {
+        return fetchService.getFinancialStatementByNotice(letterSerial, sheetId);
+    }
 }

@@ -36,6 +36,9 @@ public record CacheProperties(
         if (cacheName.equals(names().auditors())) {
             return ttls().auditorsMs();
         }
+        if (cacheName.equals(names().financialStatements())) {
+            return ttls().financialStatementsMs();
+        }
         return defaultTtlMs();
     }
 
@@ -45,7 +48,8 @@ public record CacheProperties(
             String industryGroups,
             String categories,
             String financialYears,
-            String auditors
+            String auditors,
+            String financialStatements
     ) {
     }
 
@@ -55,7 +59,8 @@ public record CacheProperties(
             long industryGroupsMs,
             long categoriesMs,
             long financialYearsMs,
-            long auditorsMs
+            long auditorsMs,
+            long financialStatementsMs
     ) {
     }
 }

@@ -45,7 +45,8 @@ public class RedisCacheConfig {
                         cacheProperties.names().industryGroups(),
                         cacheProperties.names().categories(),
                         cacheProperties.names().financialYears(),
-                        cacheProperties.names().auditors()
+                        cacheProperties.names().auditors(),
+                        cacheProperties.names().financialStatements()
                 )
                 .distinct()
                 .collect(java.util.stream.Collectors.toMap(

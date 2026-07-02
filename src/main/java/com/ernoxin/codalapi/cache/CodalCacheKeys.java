@@ -29,4 +29,14 @@ public final class CodalCacheKeys {
     public static String financialYears(String symbol) {
         return symbol.trim().toUpperCase();
     }
+
+    public static String financialStatements(CodalModels.FinancialStatementQuery query) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(KEY_MAPPER.writeValueAsString(query).getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digest);
+        } catch (JsonProcessingException | NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("Failed to build financial statement cache key", ex);
+        }
+    }
 }

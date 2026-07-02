@@ -35,6 +35,7 @@ public class CodalCacheResolver implements CacheResolver {
             case "getCategories" -> cacheProperties.names().categories();
             case "getFinancialYears" -> cacheProperties.names().financialYears();
             case "getAuditors" -> cacheProperties.names().auditors();
+            case "getFinancialStatement" -> cacheProperties.names().financialStatements();
             default -> throw new IllegalStateException("Unsupported cached method: " + methodName);
         };
     }

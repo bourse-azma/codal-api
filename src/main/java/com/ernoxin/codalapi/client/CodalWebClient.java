@@ -1,6 +1,7 @@
 package com.ernoxin.codalapi.client;
 
 import com.ernoxin.codalapi.common.exception.UpstreamApiException;
+import com.ernoxin.codalapi.config.CodalRequestProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class CodalWebClient {
 
     private final RestTemplate codalWebRestTemplate;
+    private final CodalRequestProperties requestProperties;
 
     public String getHtml(String path, Map<String, ?> queryParams) {
         return getHtmlWithRetry(buildPath(path, queryParams), 1);
@@ -74,7 +76,7 @@ public class CodalWebClient {
 
     private void sleepQuietly() {
         try {
-            Thread.sleep(750L);
+            Thread.sleep(requestProperties.retryDelayMs());
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
         }

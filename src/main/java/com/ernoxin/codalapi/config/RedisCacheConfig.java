@@ -41,6 +41,7 @@ public class RedisCacheConfig {
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = Stream.of(
                         cacheProperties.names().notices(),
+                        cacheProperties.names().noticeSnapshot(),
                         cacheProperties.names().companies(),
                         cacheProperties.names().industryGroups(),
                         cacheProperties.names().categories(),

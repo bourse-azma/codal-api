@@ -1,6 +1,7 @@
 package com.ernoxin.codalapi.client;
 
 import com.ernoxin.codalapi.common.exception.UpstreamApiException;
+import com.ernoxin.codalapi.config.CodalRequestProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class CodalClient {
 
     private final RestTemplate codalRestTemplate;
+    private final CodalRequestProperties requestProperties;
 
     public JsonNode get(String path) {
         return get(path, Map.of());
@@ -57,7 +59,7 @@ public class CodalClient {
             int statusCode = ex.getStatusCode().value();
             if (retriesLeft > 0 && (statusCode == 400 || statusCode == 429 || statusCode >= 500)) {
                 try {
-                    Thread.sleep(750L);
+                    Thread.sleep(requestProperties.retryDelayMs());
                 } catch (InterruptedException interrupted) {
                     Thread.currentThread().interrupt();
                 }
@@ -72,7 +74,7 @@ public class CodalClient {
         } catch (RestClientException ex) {
             if (retriesLeft > 0) {
                 try {
-                    Thread.sleep(750L);
+                    Thread.sleep(requestProperties.retryDelayMs());
                 } catch (InterruptedException interrupted) {
                     Thread.currentThread().interrupt();
                 }

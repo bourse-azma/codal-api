@@ -13,12 +13,13 @@ public class RestTemplateConfig {
     @Bean
     public RestTemplate codalRestTemplate(
             RestTemplateBuilder builder,
+            CodalThrottleInterceptor throttleInterceptor,
             @Value("${external.codal.base-url}") String baseUrl
     ) {
         RestTemplate restTemplate = builder
                 .rootUri(baseUrl)
                 .requestFactory(() -> new org.springframework.http.client.BufferingClientHttpRequestFactory(new org.springframework.http.client.SimpleClientHttpRequestFactory()))
-                .interceptors(new RandomizedCodalHeadersInterceptor(), new LoggingInterceptor())
+                .interceptors(throttleInterceptor, new RandomizedCodalHeadersInterceptor(), new LoggingInterceptor())
                 .build();
 
         DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory(baseUrl);
@@ -31,12 +32,13 @@ public class RestTemplateConfig {
     @Bean
     public RestTemplate codalWebRestTemplate(
             RestTemplateBuilder builder,
+            CodalThrottleInterceptor throttleInterceptor,
             @Value("${external.codal.web-base-url}") String webBaseUrl
     ) {
         RestTemplate restTemplate = builder
                 .rootUri(webBaseUrl)
                 .requestFactory(() -> new org.springframework.http.client.BufferingClientHttpRequestFactory(new org.springframework.http.client.SimpleClientHttpRequestFactory()))
-                .interceptors(new RandomizedCodalHeadersInterceptor(), new LoggingInterceptor())
+                .interceptors(throttleInterceptor, new RandomizedCodalHeadersInterceptor(), new LoggingInterceptor())
                 .build();
 
         DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory(webBaseUrl);

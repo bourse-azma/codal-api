@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 public class CodalService {
 
     private final CodalFetchService fetchService;
+    private final CodalNoticeSnapshotStore noticeSnapshotStore;
 
     @Cacheable(
             cacheResolver = "codalCacheResolver",
@@ -18,7 +19,7 @@ public class CodalService {
             sync = true
     )
     public CodalModels.NoticeSearchResult getNotices(CodalModels.NoticeSearchQuery query) {
-        return fetchService.getNotices(query);
+        return noticeSnapshotStore.find(query).orElseGet(() -> fetchService.getNotices(query));
     }
 
     @Cacheable(cacheResolver = "codalCacheResolver", key = "'all'", sync = true)

@@ -21,6 +21,9 @@ public record CacheProperties(
         if (cacheName.equals(names().notices())) {
             return ttls().noticesMs();
         }
+        if (cacheName.equals(names().noticeSnapshot())) {
+            return ttls().noticeSnapshotMs();
+        }
         if (cacheName.equals(names().companies())) {
             return ttls().companiesMs();
         }
@@ -44,6 +47,7 @@ public record CacheProperties(
 
     public record CacheNames(
             String notices,
+            String noticeSnapshot,
             String companies,
             String industryGroups,
             String categories,
@@ -55,6 +59,7 @@ public record CacheProperties(
 
     public record CacheTtls(
             long noticesMs,
+            long noticeSnapshotMs,
             long companiesMs,
             long industryGroupsMs,
             long categoriesMs,

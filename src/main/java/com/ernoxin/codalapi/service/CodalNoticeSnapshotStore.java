@@ -34,6 +34,21 @@ public class CodalNoticeSnapshotStore {
         evictOldBoardPages();
     }
 
+    /**
+     * Rewrites the current snapshot using the active cache policy. This also migrates a
+     * snapshot created with the old expiring TTL to the new persistent policy, without
+     * requiring Codal to be reachable during deployment.
+     */
+    public boolean preserveCurrent() {
+        Cache cache = snapshotCache();
+        CodalNoticeSnapshot snapshot = cache == null ? null : cache.get(SNAPSHOT_KEY, CodalNoticeSnapshot.class);
+        if (snapshot == null) {
+            return false;
+        }
+        cache.put(SNAPSHOT_KEY, snapshot);
+        return true;
+    }
+
     public Optional<CodalModels.NoticeSearchResult> find(CodalModels.NoticeSearchQuery query) {
         if (!isSnapshotQuery(query)) {
             return Optional.empty();
@@ -46,10 +61,17 @@ public class CodalNoticeSnapshotStore {
         }
 
         int pageSize = schedulerProperties.upstreamPageSize();
-        int fromIndex = Math.min(snapshot.notices().size(), (query.page() - 1) * pageSize);
+        long offset = (long) (query.page() - 1) * pageSize;
+        int fromIndex = (int) Math.min(snapshot.notices().size(), offset);
+        // The snapshot only accelerates its cached prefix. Once a request moves past that
+        // prefix, let CodalService fetch the page from upstream instead of returning an
+        // empty cached page and making the client believe pagination has ended.
+        if (fromIndex >= snapshot.notices().size() && snapshot.totalCount() > snapshot.notices().size()) {
+            return Optional.empty();
+        }
         int toIndex = Math.min(snapshot.notices().size(), fromIndex + pageSize);
         return Optional.of(new CodalModels.NoticeSearchResult(
-                snapshot.notices().size(),
+                snapshot.totalCount(),
                 query.page(),
                 false,
                 snapshot.notices().subList(fromIndex, toIndex)

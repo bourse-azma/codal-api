@@ -25,6 +25,7 @@ public class CodalNoticeRefreshScheduler {
     private final CodalNoticeSnapshotStore snapshotStore;
     private final CodalNoticeSchedulerProperties properties;
     private final AtomicBoolean refreshInProgress = new AtomicBoolean();
+    private final AtomicBoolean codalUnavailable = new AtomicBoolean();
 
     @Scheduled(
             fixedDelayString = "${scheduler.notices.refresh-ms}",
@@ -37,14 +38,48 @@ public class CodalNoticeRefreshScheduler {
         }
 
         try {
-            CodalNoticeSnapshot snapshot = fetchSnapshot();
-            snapshotStore.publish(snapshot);
-            log.info("Published CODAL notice snapshot with {} notices", snapshot.notices().size());
-        } catch (RuntimeException ex) {
-            // Publishing happens only after every required page succeeds, so the last good snapshot survives.
-            log.warn("CODAL notice snapshot refresh failed; keeping the previous snapshot: {}", ex.getMessage());
+            refreshSnapshot();
         } finally {
             refreshInProgress.set(false);
+        }
+    }
+
+    private void refreshSnapshot() {
+        CodalNoticeSnapshot snapshot;
+        try {
+            snapshot = fetchSnapshot();
+        } catch (RuntimeException ex) {
+            codalUnavailable.set(true);
+            boolean retained = preservePreviousSnapshot();
+            log.warn("CODAL notice snapshot refresh failed; previous snapshot retained={}: {}",
+                    retained, ex.getMessage());
+            return;
+        }
+
+        try {
+            snapshotStore.publish(snapshot);
+        } catch (RuntimeException cacheException) {
+            // A failed Redis write does not imply that Codal is unavailable. Cache put is atomic,
+            // so readers either keep seeing the old snapshot or receive the complete new one.
+            log.error("CODAL was fetched successfully but the notice snapshot could not be published: {}",
+                    cacheException.getMessage());
+            return;
+        }
+
+        boolean recovered = codalUnavailable.getAndSet(false);
+        log.info("Published CODAL notice snapshot with {} cached notices out of {} total",
+                snapshot.notices().size(), snapshot.totalCount());
+        if (recovered) {
+            log.info("CODAL is available again; the retained notice snapshot was refreshed successfully");
+        }
+    }
+
+    private boolean preservePreviousSnapshot() {
+        try {
+            return snapshotStore.preserveCurrent();
+        } catch (RuntimeException cacheException) {
+            log.error("Could not preserve the previous CODAL notice snapshot: {}", cacheException.getMessage());
+            return false;
         }
     }
 
@@ -59,6 +94,9 @@ public class CodalNoticeRefreshScheduler {
             }
 
             upstreamTotal = Math.max(0, result.totalCount());
+            if (upstreamTotal == 0) {
+                throw new IllegalStateException("CODAL returned an invalid zero notice total");
+            }
             for (CodalModels.NoticeItem notice : result.notices()) {
                 uniqueNotices.putIfAbsent(noticeKey(notice), notice);
                 if (uniqueNotices.size() >= properties.targetCount()) {
@@ -66,9 +104,13 @@ public class CodalNoticeRefreshScheduler {
                 }
             }
 
+            if (result.notices().isEmpty()
+                    && uniqueNotices.size() < Math.min(properties.targetCount(), upstreamTotal)) {
+                throw new IllegalStateException("CODAL returned an incomplete empty notice page: " + page);
+            }
+
             if (uniqueNotices.size() >= properties.targetCount()
-                    || uniqueNotices.size() >= upstreamTotal
-                    || result.notices().isEmpty()) {
+                    || uniqueNotices.size() >= upstreamTotal) {
                 break;
             }
         }
@@ -77,10 +119,14 @@ public class CodalNoticeRefreshScheduler {
         if (notices.size() > properties.targetCount()) {
             notices = notices.subList(0, properties.targetCount());
         }
-        if (notices.isEmpty()) {
-            throw new IllegalStateException("CODAL returned an empty notice snapshot");
+        int requiredCount = Math.min(properties.targetCount(), upstreamTotal);
+        if (notices.size() < requiredCount) {
+            throw new IllegalStateException(
+                    "CODAL returned an incomplete notice snapshot: expected "
+                            + requiredCount + ", received " + notices.size()
+            );
         }
-        return new CodalNoticeSnapshot(System.currentTimeMillis(), notices);
+        return new CodalNoticeSnapshot(System.currentTimeMillis(), upstreamTotal, notices);
     }
 
     private CodalModels.NoticeSearchQuery snapshotQuery(int page) {

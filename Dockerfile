@@ -6,11 +6,11 @@ ENV MAVEN_OPTS="-Xmx${MAVEN_BUILD_HEAP_MB}m -XX:+UseSerialGC -XX:+ExitOnOutOfMem
 
 COPY pom.xml ./
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn -B -ntp -DskipTests dependency:go-offline
+    mvn -B -ntp dependency:go-offline
 
 COPY src ./src
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn -B -ntp -DskipTests clean package && \
+    mvn -B -ntp clean package && \
     JAR_FILE="$(find target -maxdepth 1 -type f -name '*.jar' ! -name '*.original' | head -n 1)" && \
     test -n "${JAR_FILE}" && \
     cp "${JAR_FILE}" /workspace/app.jar && \

@@ -87,7 +87,10 @@ public class CodalNoticeRefreshScheduler {
         Map<String, CodalModels.NoticeItem> uniqueNotices = new LinkedHashMap<>();
         int upstreamTotal = Integer.MAX_VALUE;
 
-        for (int page = 1; page <= properties.pageCount(); page++) {
+        // A page may contain a duplicate of a previous page while CODAL is publishing new
+        // notices. Fetch a small overflow instead of rejecting an otherwise valid snapshot.
+        int maximumPages = properties.pageCount() + 2;
+        for (int page = 1; page <= maximumPages; page++) {
             CodalModels.NoticeSearchResult result = fetchService.getNotices(snapshotQuery(page));
             if (result.attackerDetected()) {
                 throw new IllegalStateException("CODAL marked the request as an attacker");

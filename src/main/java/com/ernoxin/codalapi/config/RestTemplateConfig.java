@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import java.time.Duration;
+
 @Configuration
 public class RestTemplateConfig {
 
@@ -14,10 +16,14 @@ public class RestTemplateConfig {
     public RestTemplate codalRestTemplate(
             RestTemplateBuilder builder,
             CodalThrottleInterceptor throttleInterceptor,
-            @Value("${external.codal.base-url}") String baseUrl
+            @Value("${external.codal.base-url}") String baseUrl,
+            @Value("${external.codal.connect-timeout-ms:10000}") long connectTimeoutMs,
+            @Value("${external.codal.read-timeout-ms:30000}") long readTimeoutMs
     ) {
         RestTemplate restTemplate = builder
                 .rootUri(baseUrl)
+                .connectTimeout(Duration.ofMillis(connectTimeoutMs))
+                .readTimeout(Duration.ofMillis(readTimeoutMs))
                 .requestFactory(() -> new org.springframework.http.client.BufferingClientHttpRequestFactory(new org.springframework.http.client.SimpleClientHttpRequestFactory()))
                 .interceptors(throttleInterceptor, new RandomizedCodalHeadersInterceptor(), new LoggingInterceptor())
                 .build();
@@ -33,10 +39,14 @@ public class RestTemplateConfig {
     public RestTemplate codalWebRestTemplate(
             RestTemplateBuilder builder,
             CodalThrottleInterceptor throttleInterceptor,
-            @Value("${external.codal.web-base-url}") String webBaseUrl
+            @Value("${external.codal.web-base-url}") String webBaseUrl,
+            @Value("${external.codal.connect-timeout-ms:10000}") long connectTimeoutMs,
+            @Value("${external.codal.read-timeout-ms:30000}") long readTimeoutMs
     ) {
         RestTemplate restTemplate = builder
                 .rootUri(webBaseUrl)
+                .connectTimeout(Duration.ofMillis(connectTimeoutMs))
+                .readTimeout(Duration.ofMillis(readTimeoutMs))
                 .requestFactory(() -> new org.springframework.http.client.BufferingClientHttpRequestFactory(new org.springframework.http.client.SimpleClientHttpRequestFactory()))
                 .interceptors(throttleInterceptor, new RandomizedCodalHeadersInterceptor(), new LoggingInterceptor())
                 .build();
